@@ -2,21 +2,17 @@ const express = require('express');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
 const swaggerUi = require('swagger-ui-express');
-const taskRoutes = require('./routes/task.route');
 const swaggerDocument = require('./swagger/swagger');
 const { sequelize } = require('./models');
-
+const routes = require('./routes');
 const app = express();
 
-// Middleware
 app.use(logger('dev'));
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// Swagger setup
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// Kết nối database và đồng bộ Sequelize
 sequelize
   .sync()
   .then(() => {
@@ -26,8 +22,7 @@ sequelize
     console.error('Error syncing database:', err);
   });
 
-// Routes
-app.use('/api', taskRoutes);
+routes(app);
 
 app.use((req, res, next) => {
   const err = new Error('Not Found');
